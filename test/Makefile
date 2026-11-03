@@ -6,7 +6,11 @@ SIM ?= icarus
 FST ?= -fst # Use more efficient FST format
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+PROJECT_SOURCES = \
+    tt_um_sari_leen_vga_qspi.v \
+    integration_top.v \
+    qspi_reader.v \
+    vga_controller.v
 
 ifneq ($(GATES),yes)
 

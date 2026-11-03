@@ -1,29 +1,28 @@
+
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+  title: "VGA Controller with External QSPI Flash"
+  author: "Leen Khamaysi and Sari Awabdy"
+  discord: ""
+  description: "VGA controller displaying images from W25Q128JV QSPI Flash"
+  language: "Verilog"
+  clock_hz: 25000000
 
-  # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  # Initial allocation for testing.
+  # May need to increase after synthesis.
+  tiles: "1x1"
 
-  # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_example"
+  top_module: "tt_um_sari_leen_vga_qspi"
 
-  # List your project's source files here.
-  # Source files must be in ./src and you must list each source file separately, one per line.
-  # Don't forget to also update `PROJECT_SOURCES` in test/Makefile.
   source_files:
-    - "project.v"
+    - "tt_um_sari_leen_vga_qspi.v"
+    - "integration_top.v"
+    - "qspi_reader.v"
+    - "vga_controller.v"
 
-# The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
-# This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: ""
+  ui[0]: "QSPI late sampling"
   ui[1]: ""
   ui[2]: ""
   ui[3]: ""
@@ -32,25 +31,24 @@ pinout:
   ui[6]: ""
   ui[7]: ""
 
-  # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  # VGA outputs
+  uo[0]: "VGA R1"
+  uo[1]: "VGA G1"
+  uo[2]: "VGA B1"
+  uo[3]: "VGA VSYNC"
+  uo[4]: "VGA R0"
+  uo[5]: "VGA G0"
+  uo[6]: "VGA B0"
+  uo[7]: "VGA HSYNC"
 
-  # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
+  # QSPI Flash
+  uio[0]: "Flash CS#"
+  uio[1]: "QSPI IO0"
+  uio[2]: "QSPI IO1"
+  uio[3]: "QSPI SCK"
+  uio[4]: "QSPI IO2"
+  uio[5]: "QSPI IO3"
+  uio[6]: "RAM CS1# (inactive)"
+  uio[7]: "RAM CS2# (inactive)"
 
-# Do not change!
 yaml_version: 6
