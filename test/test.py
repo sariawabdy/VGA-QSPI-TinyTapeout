@@ -1,40 +1,44 @@
-# SPDX-FileCopyrightText: © 2024 Tiny Tapeout
-# SPDX-License-Identifier: Apache-2.0
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles
+from cocotb.triggers import ClockCycles, Timer
 
 
 @cocotb.test()
-async def test_project(dut):
-    dut._log.info("Start")
+async def test_vga_qspi_reset(dut):
+    # 25 MHz clock
+    cocotb.start_soon(Clock(dut.clk, 40, unit="ns").start())
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
-    cocotb.start_soon(clock.start())
-
-    # Reset
-    dut._log.info("Reset")
+    # Initialize Tiny Tapeout inputs
     dut.ena.value = 1
     dut.ui_in.value = 0
     dut.uio_in.value = 0
     dut.rst_n.value = 0
-    await ClockCycles(dut.clk, 10)
+ 
+    # Hold reset for several cycles
+    await ClockCycles(dut.clk, 5)
+    await Timer(1, unit="ns")
+
+    # VGA output during reset:
+    # uo[7] = HSYNC, uo[3] = VSYNC, RGB = black
+    assert int(dut.uo_out.value) == 0b10001000, (
+        f"Unexpected VGA reset outputs: {dut.uo_out.value}"
+    )
+
+    # Flash CS# high, Flash SCK low
+    uio = int(dut.uio_out.value)
+    assert (uio & 0x01) != 0, "Flash CS# must be high"
+    assert (uio & 0x08) == 0, "Flash SCK must be low"
+
+    # Unused RAM chip selects must remain high
+    assert (uio & 0xC0) == 0xC0
+
+    # Release reset
     dut.rst_n.value = 1
+    await ClockCycles(dut.clk, 5)
+    await Timer(1, unit="ns")
 
-    dut._log.info("Test project behavior")
+    # QSPI reader should remain idle initially
+    assert (int(dut.uio_out.value) & 0x01) != 0
 
-    # Set the input values you want to test
-    dut.ui_in.value = 20
-    dut.uio_in.value = 30
-
-    # Wait for one clock cycle to see the output values
-    await ClockCycles(dut.clk, 1)
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    assert dut.uo_out.value == 50
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
+    dut._log.info("VGA/QSPI reset and pin checks passed")

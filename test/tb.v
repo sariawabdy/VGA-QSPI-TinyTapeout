@@ -28,7 +28,7 @@ module tb ();
 `endif
 
   // Replace tt_um_example with your module name:
-  tt_um_example user_project (
+  tt_um_sari_leen_vga_qspi user_project (
 
       // Include power ports for the Gate Level test:
 `ifdef GL_TEST
