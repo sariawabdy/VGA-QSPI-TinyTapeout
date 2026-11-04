@@ -191,13 +191,6 @@ module tt_um_sari_leen_vga_qspi (
     wire _unused = &{ena, ui_in[7:1], 1'b0};
 
 
-    `ifndef SYNTHESIS
-    initial begin
-        $dumpfile("wrapper.vcd");
-        $dumpvars(0, tt_um_sari_leen_vga_qspi);
-    end
-    `endif
-
 endmodule
 
 `default_nettype wire

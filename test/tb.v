@@ -1,8 +1,11 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-/* This testbench just instantiates the module and makes some convenient wires
-   that can be driven / tested by the cocotb test.py.
+/* Testbench for tt_um_sari_leen_vga_qspi.
+   It only instantiates the module and adds convenient wires that test.py can
+   watch. It is used for BOTH the normal (RTL) test and the gate-level (GL) test
+   that the gds action runs, so test.py only uses these top-level pins/wires,
+   never signals inside the design (those don't exist in the GL netlist).
 */
 module tb ();
 
@@ -27,7 +30,6 @@ module tb ();
   wire VGND = 1'b0;
 `endif
 
-  // Replace tt_um_example with your module name:
   tt_um_sari_leen_vga_qspi user_project (
 
       // Include power ports for the Gate Level test:
@@ -45,5 +47,12 @@ module tb ();
       .clk    (clk),      // clock
       .rst_n  (rst_n)     // not reset
   );
+
+  // Single-bit copies of the pins, so cocotb can wait for their edges
+  // (Icarus can't trigger on a bit of a vector like uio_out[3]).
+  wire flash_cs_n = uio_out[0];
+  wire flash_sck  = uio_out[3];
+  wire vga_hsync  = uo_out[7];
+  wire vga_vsync  = uo_out[3];
 
 endmodule
