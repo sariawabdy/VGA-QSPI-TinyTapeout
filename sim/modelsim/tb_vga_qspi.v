@@ -6,7 +6,7 @@
 //   - runs one whole frame plus the start of the next one
 //   - checks every VGA pixel against image.hex, and checks HSYNC / VSYNC positions
 //   - checks that the chip and the flash never drive the same IO pin at once
-//   - saves the second frame as frame.ppm (open it with GIMP, IrfanView, macOS Preview...)
+//   - saves the second frame as frame.bmp (double-click on Windows) and frame.ppm
 //   - prints PASS or FAIL
 //
 // Parameters (change with vsim -g, see run_late.do):
@@ -125,6 +125,13 @@ module tb_vga_qspi;
         if (h == 400 && v == 300 && uo_out[3] !== 1'b1) begin errors = errors + 1; $display("ERROR: VSYNC not high on line 300"); end
     end
 
+    // write a value as n little-endian bytes (for the BMP file)
+    task write_le(input integer fd, input integer value, input integer n);
+        integer j;
+        for (j = 0; j < n; j = j + 1)
+            $fwrite(fd, "%c", (value >> (8 * j)) & 8'hFF);
+    endtask
+
     // ---------------- run ----------------
     integer f, p, r, g, b;
     initial begin
@@ -147,11 +154,36 @@ module tb_vga_qspi;
         end
         $fclose(f);
 
+        // also save it as frame.bmp (24-bit BMP), which Windows opens with a double-click
+        f = $fopen("frame.bmp", "wb");
+        write_le(f, 16'h4D42, 2);                // "BM"
+        write_le(f, 54 + 640 * 480 * 3, 4);      // file size
+        write_le(f, 0, 4);                       // reserved
+        write_le(f, 54, 4);                      // offset to pixel data
+        write_le(f, 40, 4);                      // header size
+        write_le(f, 640, 4);                     // width
+        write_le(f, 480, 4);                     // height (rows stored bottom-up)
+        write_le(f, 1, 2);                       // planes
+        write_le(f, 24, 2);                      // bits per pixel
+        write_le(f, 0, 4);                       // no compression
+        write_le(f, 640 * 480 * 3, 4);           // image size
+        write_le(f, 2835, 4);                    // 72 dpi
+        write_le(f, 2835, 4);
+        write_le(f, 0, 4);
+        write_le(f, 0, 4);
+        for (r = 479; r >= 0; r = r - 1)
+            for (p = 0; p < 640; p = p + 1) begin
+                write_le(f, frame1[r * 640 + p][1:0] * 85, 1);   // blue  (0..3 -> 0..255)
+                write_le(f, frame1[r * 640 + p][3:2] * 85, 1);   // green
+                write_le(f, frame1[r * 640 + p][5:4] * 85, 1);   // red
+            end
+        $fclose(f);
+
         $display("------------------------------------------------------------");
         $display("pixels checked: %0d   pixel/sync errors: %0d   bus fights: %0d",
                  pixel_checks, errors, fights);
         if (errors == 0 && fights == 0 && pixel_checks > 0)
-            $display("PASS  (picture saved as frame.ppm)");
+            $display("PASS  (picture saved as frame.bmp and frame.ppm)");
         else
             $display("FAIL");
         $display("------------------------------------------------------------");

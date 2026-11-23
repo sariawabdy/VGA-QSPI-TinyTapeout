@@ -6,7 +6,7 @@ so copy (or `git clone`) the **whole repo** to the lab PC, not just this folder.
 | File | What it is |
 |---|---|
 | `../../src/` | the 4 design files (the repo's `src/`, used directly) |
-| `tb_vga_qspi.v` | the testbench: clock, reset, flash on the uio pins, checks every pixel, PASS/FAIL |
+| `tb_vga_qspi.v` | the testbench: clock, reset, flash on the uio pins, checks every pixel, PASS/FAIL, saves `frame.bmp` |
 | `flash_model.v` | Verilog model of the W25Q128JV flash (commands 03h and 6Bh), loaded with `image.hex` |
 | `image.hex` | the 160×120 image (19,200 bytes, `00RRGGBB`) |
 | `run.do` | compile + simulate + waves, normal case |
@@ -26,11 +26,11 @@ so copy (or `git clone`) the **whole repo** to the lab PC, not just this folder.
 6. At the end the Transcript shows:
    ```
    pixels checked: 154240   pixel/sync errors: 0   bus fights: 0
-   PASS  (picture saved as frame.ppm)
+   PASS  (picture saved as frame.bmp and frame.ppm)
    ```
    ModelSim then pauses at `$stop`; that's normal.
-7. Open **`frame.ppm`** (in the same folder) with GIMP, IrfanView, Photoshop, or macOS Preview:
-   it's the screen your chip drew in simulation.
+7. Double-click **`frame.bmp`** (in the same folder): it's the screen your chip drew in simulation.
+   (`frame.ppm` is the same picture, for macOS Preview or GIMP.)
 8. Optional: `do run_late.do` should also PASS.
 
 ## What it checks
