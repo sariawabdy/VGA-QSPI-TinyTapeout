@@ -1,0 +1,14 @@
+db/
+incremental_db/
+output_files/
+simulation/
+*.qws
+*.bak
+*.rpt
+*.summary
+*.done
+*.smsg
+*.jdi
+*.pin
+*.sld
+greybox_tmp/
